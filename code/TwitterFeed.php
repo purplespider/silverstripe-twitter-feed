@@ -1,78 +1,92 @@
 <?php
 
-class TwitterFeed extends DataExtension {
+class TwitterFeed extends DataExtension
+{
 
-	// Default Keys - Use site specifc keys if possible: https://dev.twitter.com/apps
-	private static $consumer_key = null;
-	private static $consumer_secret = null;
-	private static $user_token = null;
-	private static $user_secret = null;
-	
-	private static $username = "twitter";
-	private static $tweetcount = 3;
-	
-	// Getters
-	public static function get_consumer_key() {
-		return self::$consumer_key;
-	}
-	
-	public static function get_consumer_secret() {
-		return self::$consumer_secret;
-	}
-	
-	public static function get_user_token() {
-		return self::$user_token;
-	}
-	
-	public static function get_user_secret() {
-		return self::$user_secret;
-	}
-	
-	public static function get_username() {
-		return self::$username;
-	}
-	
-	public static function get_tweetcount() {
-		return self::$tweetcount;
-	}
-	
-	// Setters
-	public static function set_consumer_key($value) {
-		self::$consumer_key = $value;
-	}
-	
-	public static function set_consumer_secret($value) {
-		self::$consumer_secret = $value;
-	}
-	
-	public static function set_user_token($value) {
-		self::$user_token = $value;
-	}
-	
-	public static function set_user_secret($value) {
-		self::$user_secret = $value;
-	}
-	
-	public static function set_username($value) {
-		self::$username = $value;
-	}
-	
-	public static function set_tweetcount($value) {
-		self::$tweetcount = $value;
-	}
-	
-	 /**
+    // Default Keys - Use site specifc keys if possible: https://dev.twitter.com/apps
+    private static $consumer_key = null;
+    private static $consumer_secret = null;
+    private static $user_token = null;
+    private static $user_secret = null;
+    
+    private static $username = "twitter";
+    private static $tweetcount = 3;
+    
+    // Getters
+    public static function get_consumer_key()
+    {
+        return self::$consumer_key;
+    }
+    
+    public static function get_consumer_secret()
+    {
+        return self::$consumer_secret;
+    }
+    
+    public static function get_user_token()
+    {
+        return self::$user_token;
+    }
+    
+    public static function get_user_secret()
+    {
+        return self::$user_secret;
+    }
+    
+    public static function get_username()
+    {
+        return self::$username;
+    }
+    
+    public static function get_tweetcount()
+    {
+        return self::$tweetcount;
+    }
+    
+    // Setters
+    public static function set_consumer_key($value)
+    {
+        self::$consumer_key = $value;
+    }
+    
+    public static function set_consumer_secret($value)
+    {
+        self::$consumer_secret = $value;
+    }
+    
+    public static function set_user_token($value)
+    {
+        self::$user_token = $value;
+    }
+    
+    public static function set_user_secret($value)
+    {
+        self::$user_secret = $value;
+    }
+    
+    public static function set_username($value)
+    {
+        self::$username = $value;
+    }
+    
+    public static function set_tweetcount($value)
+    {
+        self::$tweetcount = $value;
+    }
+    
+     /**
 * Function to convert links, mentions and hashtags: http://goo.gl/ciKGs
 */
-    function tweetConvert($tweet_string) {
+    public function tweetConvert($tweet_string)
+    {
         $tweet_string = preg_replace("/((http(s?):\/\/)|(www\.))([\w\.]+)([a-zA-Z0-9?&%.;:\/=+_-]+)/i", "<a href='http$3://$4$5$6' target='_blank'>$2$4$5$6</a>", $tweet_string);
         $tweet_string = preg_replace("/(?<=\A|[^A-Za-z0-9_])@([A-Za-z0-9_]+)(?=\Z|[^A-Za-z0-9_])/", "<a href='http://twitter.com/$1' target='_blank'>$0</a>", $tweet_string);
         $tweet_string = preg_replace("/(?<=\A|[^A-Za-z0-9_])#([A-Za-z0-9_]+)(?=\Z|[^A-Za-z0-9_])/", "<a href='http://twitter.com/search?q=%23$1' target='_blank'>$0</a>", $tweet_string);
         return $tweet_string;
     }
 
-    function getLatestTweets() {
-
+    public function getLatestTweets()
+    {
         require(Director::baseFolder() . '/twitter-feed/libs/tmhOAuth.php');
         require(Director::baseFolder() . '/twitter-feed/libs/tmhUtilities.php');
 
@@ -93,7 +107,7 @@ class TwitterFeed extends DataExtension {
         $response = $tmhOAuth->response['response'];
         $tweets = json_decode($response, true);
         
-        if($this->_errorCheck($tweets)){
+        if ($this->_errorCheck($tweets)) {
             return false;
         }
 
@@ -110,29 +124,30 @@ class TwitterFeed extends DataExtension {
         return $output->limit(self::get_tweetcount());
     }
 
-    private function _errorCheck($tweets){
-        if(array_key_exists('errors', $tweets)){
+    private function _errorCheck($tweets)
+    {
+        if (array_key_exists('errors', $tweets)) {
             $message = 'We have encountered '.count($tweets['errors']).' error(s): <br />';
             foreach ($tweets['errors'] as $error) {
                 $message .= $error['message'].' Code:'.$error['code'].'<br />';
             }
-            if(Director::isDev()){
+            if (Director::isDev()) {
                 throw new Exception($message, 1);
-            } else if (Email::getAdminEmail()){
-            	$from = Email::getAdminEmail();
-            	$to = Email::getAdminEmail();
-            	$subject = "Twitter Feed Failure - ".Director::AbsoluteBaseURL();
-            	$body = $message;
-            	$body.= "<br /><br />Reported by ".Director::AbsoluteBaseURL();
-	            $email = new Email($from, $to, $subject, $body);
-				$email->send();
+            } elseif (Email::getAdminEmail()) {
+                $from = Email::getAdminEmail();
+                $to = Email::getAdminEmail();
+                $subject = "Twitter Feed Failure - ".Director::AbsoluteBaseURL();
+                $body = $message;
+                $body.= "<br /><br />Reported by ".Director::AbsoluteBaseURL();
+                $email = new Email($from, $to, $subject, $body);
+                $email->send();
             }
             return true;
         }
     }
     
-    public function TwitterCacheCounter() {
-	    return (int)(time() / 60 / 5); // Returns a new number every five minutes
-	}
-
+    public function TwitterCacheCounter()
+    {
+        return (int)(time() / 60 / 5); // Returns a new number every five minutes
+    }
 }
