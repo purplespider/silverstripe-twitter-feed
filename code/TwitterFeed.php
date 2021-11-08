@@ -87,8 +87,8 @@ class TwitterFeed extends DataExtension
 
     public function getLatestTweets()
     {
-        require(Director::baseFolder() . '/twitter-feed/libs/tmhOAuth.php');
-        require(Director::baseFolder() . '/twitter-feed/libs/tmhUtilities.php');
+        //require(Director::baseFolder() . '/twitter-feed/libs/tmhOAuth.php');
+        //require(Director::baseFolder() . '/twitter-feed/libs/tmhUtilities.php');
 
         $tmhOAuth = new tmhOAuth(array(
             'consumer_key' => self::get_consumer_key(),
